@@ -4,5 +4,13 @@
   "workspaces": [
     "apps/api",
     "apps/web"
-  ]
+  ],
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@prisma/client": "^6.19.0",
+    "prisma": "^6.19.0",
+    "tsx": "^4.19.4"
+  }
 }
