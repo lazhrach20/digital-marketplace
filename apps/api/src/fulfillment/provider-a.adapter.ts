@@ -26,6 +26,10 @@ function parseTimeoutMs(raw: string | undefined): number {
   return value;
 }
 
+function parseEnvFlag(raw: string | undefined): boolean {
+  return raw === '1';
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -36,12 +40,18 @@ function sleep(ms: number): Promise<void> {
  * Timeout-after-issue: allocate and persist `ok` + `code` on the `ProviderRequest`
  * row **before** returning `{ status: 'timeout' }`, so a retry with the same
  * `requestId` returns that code and does not consume a second key.
+ *
+ * Deterministic flags (T6/T7/scripts; mutually exclusive with random rates):
+ * - `PROVIDER_A_FORCE_TIMEOUT_THEN_OK=1` — first call times out after issue; retry → same code
+ * - `PROVIDER_A_ALWAYS_DOWN=1` — every call returns simulated 5xx (no key allocation)
  */
 @Injectable()
 export class ProviderAAdapter implements IssueProvider {
   private readonly errorRate: number;
   private readonly timeoutRate: number;
   private readonly timeoutMs: number;
+  private readonly forceTimeoutThenOk: boolean;
+  private readonly alwaysDown: boolean;
 
   constructor(
     private readonly inventory: InventoryService,
@@ -50,6 +60,10 @@ export class ProviderAAdapter implements IssueProvider {
     this.errorRate = parseRate(process.env.PROVIDER_A_ERROR_RATE);
     this.timeoutRate = parseRate(process.env.PROVIDER_A_TIMEOUT_RATE);
     this.timeoutMs = parseTimeoutMs(process.env.PROVIDER_TIMEOUT_MS);
+    this.forceTimeoutThenOk = parseEnvFlag(
+      process.env.PROVIDER_A_FORCE_TIMEOUT_THEN_OK,
+    );
+    this.alwaysDown = parseEnvFlag(process.env.PROVIDER_A_ALWAYS_DOWN);
   }
 
   async issue(request: IssueRequest): Promise<IssueResult> {
@@ -65,6 +79,18 @@ export class ProviderAAdapter implements IssueProvider {
         requestId: request.requestId,
         code: row.code,
       };
+    }
+
+    if (this.alwaysDown) {
+      await this.requests.markOutcome(
+        request.requestId,
+        FulfillmentOutcome.error,
+      );
+      return { status: 'error', reason: '5xx' };
+    }
+
+    if (this.forceTimeoutThenOk) {
+      return this.issueThenTimeout(request);
     }
 
     if (Math.random() < this.timeoutRate) {
