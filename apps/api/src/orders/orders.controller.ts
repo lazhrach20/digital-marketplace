@@ -1,6 +1,6 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { CreatedOrder, OrdersService } from './orders.service';
+import { CreatedOrder, OrderDetail, OrdersService } from './orders.service';
 
 export class CreateOrderDto {
   @IsString()
@@ -20,5 +20,10 @@ export class OrdersController {
   @Post()
   create(@Body() dto: CreateOrderDto): Promise<CreatedOrder> {
     return this.ordersService.create(dto);
+  }
+
+  @Get(':id')
+  findById(@Param('id') id: string): Promise<OrderDetail> {
+    return this.ordersService.findById(id);
   }
 }

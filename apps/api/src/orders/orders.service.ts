@@ -23,6 +23,15 @@ export type CreatedOrder = {
   code: null;
 };
 
+export type OrderDetail = {
+  id: string;
+  sku: string;
+  status: OrderStatus;
+  amount: number;
+  currency: string;
+  code: string | null;
+};
+
 type CreateOrderDtoLike = {
   sku: string;
   id?: string;
@@ -106,6 +115,24 @@ export class OrdersService {
     }
 
     return created;
+  }
+
+  async findById(id: string): Promise<OrderDetail> {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) {
+      throw new NotFoundException(`Order ${id} not found`);
+    }
+
+    const status = order.status as OrderStatus;
+
+    return {
+      id: order.id,
+      sku: order.sku,
+      status,
+      amount: order.amount,
+      currency: order.currency,
+      code: status === OrderStatus.delivered ? order.code : null,
+    };
   }
 
   private resolveOrderId(id: string | undefined): string {
