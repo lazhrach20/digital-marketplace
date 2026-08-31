@@ -11,6 +11,7 @@ import { OrderStatus, PaymentStatus } from '../domain/enums';
 import { ORDER_STATUS_CHANGED } from '../domain/log-events';
 import { generateOrderId, isValidOrderId } from '../domain/order-id';
 import { applyPaymentEvent } from '../domain/payment-policy';
+import { canRetryDelivery } from '../domain/state-machine';
 import { FulfillmentService } from '../fulfillment/fulfillment.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -122,17 +123,33 @@ export class OrdersService {
     if (!order) {
       throw new NotFoundException(`Order ${id} not found`);
     }
+    return this.toOrderDetail(order);
+  }
+
+  /**
+   * F12: idempotent re-issue from out_of_stock / delivery_failed / stuck delivering.
+   * Already-delivered orders return the same code and skip fulfillment.
+   */
+  async retryDelivery(id: string): Promise<OrderDetail> {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) {
+      throw new NotFoundException(`Order ${id} not found`);
+    }
 
     const status = order.status as OrderStatus;
 
-    return {
-      id: order.id,
-      sku: order.sku,
-      status,
-      amount: order.amount,
-      currency: order.currency,
-      code: status === OrderStatus.delivered ? order.code : null,
-    };
+    if (status === OrderStatus.delivered) {
+      return this.toOrderDetail(order);
+    }
+
+    if (!canRetryDelivery(status)) {
+      throw new ConflictException(
+        `Order ${id} cannot retry delivery from status ${status}`,
+      );
+    }
+
+    await this.tryRetryDelivery(id);
+    return this.findById(id);
   }
 
   private resolveOrderId(id: string | undefined): string {
@@ -211,6 +228,25 @@ export class OrdersService {
     return null;
   }
 
+  private toOrderDetail(order: {
+    id: string;
+    sku: string;
+    status: string;
+    amount: number;
+    currency: string;
+    code: string | null;
+  }): OrderDetail {
+    const status = order.status as OrderStatus;
+    return {
+      id: order.id,
+      sku: order.sku,
+      status,
+      amount: order.amount,
+      currency: order.currency,
+      code: status === OrderStatus.delivered ? order.code : null,
+    };
+  }
+
   /**
    * Persist `paid` first; fulfillment is best-effort until task-030.
    * The stub throws NotImplemented — do not roll back the paid order.
@@ -229,6 +265,30 @@ export class OrdersService {
       }
       this.logger.error({
         event: 'fulfillment.start_failed',
+        orderId,
+        error: String(error),
+      });
+    }
+  }
+
+  /**
+   * Retry is best-effort until fulfillment is wired.
+   * The stub throws NotImplemented — do not fail the HTTP request.
+   */
+  private async tryRetryDelivery(orderId: string): Promise<void> {
+    try {
+      await this.fulfillmentService.retryDelivery(orderId);
+    } catch (error) {
+      if (error instanceof NotImplementedException) {
+        this.logger.warn({
+          event: 'fulfillment.deferred',
+          orderId,
+          reason: 'retryDelivery is not implemented yet',
+        });
+        return;
+      }
+      this.logger.error({
+        event: 'fulfillment.retry_failed',
         orderId,
         error: String(error),
       });

@@ -37,3 +37,14 @@ export function assertTransition(from: OrderStatus, to: OrderStatus): void {
     );
   }
 }
+
+/**
+ * F12 retry-delivery: resume from recoverable or stuck `delivering`.
+ * `paid` may go to `delivering` via first fulfillment, not this endpoint.
+ */
+export function canRetryDelivery(status: OrderStatus): boolean {
+  if (status === OrderStatus.paid) {
+    return false;
+  }
+  return canTransition(status, OrderStatus.delivering);
+}
