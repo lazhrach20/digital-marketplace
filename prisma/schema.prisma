@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  sku      String @id
+  name     String
+  type     String
+  price    Int
+  currency String @default("RUB")
+  image    String
+}
+
+model Order {
+  id        String   @id
+  sku       String
+  amount    Int
+  currency  String
+  status    String
+  code      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inventoryKey     InventoryKey?
+  providerRequests ProviderRequest[]
+
+  @@index([status])
+}
+
+model InventoryKey {
+  code    String  @id
+  sku     String?
+  orderId String? @unique
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+model PaymentEvent {
+  eventId     String    @id
+  orderId     String?
+  status      String
+  payload     Json
+  processedAt DateTime?
+
+  @@index([orderId])
+}
+
+model ProviderRequest {
+  requestId String  @id
+  orderId   String
+  provider  String
+  outcome   String
+  code      String?
+  order     Order   @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
