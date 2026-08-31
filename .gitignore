@@ -1,0 +1,22 @@
+# App deliverable only — keep orchestrator / local tooling out of git
+.cursor/
+prds/
+.execution/
+.playwright-mcp/
+
+# Dependencies and build
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Env and secrets
+.env
+.env.local
+*.pem
+
+# Logs and OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
