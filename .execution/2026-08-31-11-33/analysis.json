@@ -1,0 +1,47 @@
+{
+  "prdTitle": "Digital Marketplace (ядро магазина цифровых товаров)",
+  "features": [
+    { "id": "F1", "title": "Каталог", "inScope": true, "domains": ["backend", "database", "frontend"] },
+    { "id": "F2", "title": "Создание и чтение заказа", "inScope": true, "domains": ["backend", "database"] },
+    { "id": "F3", "title": "Вебхук оплаты", "inScope": true, "domains": ["backend", "domain"] },
+    { "id": "F4", "title": "Авто-выдача через поставщиков-заглушки", "inScope": true, "domains": ["backend", "domain", "database"] },
+    { "id": "F5", "title": "Exactly-once и идемпотентность", "inScope": true, "domains": ["backend", "domain", "frontend", "tests"] },
+    { "id": "F6", "title": "Жизненный цикл заказа", "inScope": true, "domains": ["backend", "domain", "database"] },
+    { "id": "F7", "title": "Таймауты, retry, fallback", "inScope": true, "domains": ["backend", "domain"] },
+    { "id": "F8", "title": "Витрина", "inScope": true, "domains": ["frontend"] },
+    { "id": "F9", "title": "Страница статуса заказа", "inScope": true, "domains": ["frontend", "backend"] },
+    { "id": "F10", "title": "Наблюдаемость", "inScope": true, "domains": ["backend", "domain"] },
+    { "id": "F11", "title": "Скрипты воспроизведения", "inScope": true, "domains": ["backend", "tests", "infra"] },
+    { "id": "F12", "title": "Повторная выдача (retry-delivery)", "inScope": true, "domains": ["backend", "domain", "tests"] }
+  ],
+  "bonuses": [
+    { "id": "B1", "title": "Сверка, восстановление, журнал", "inScope": false },
+    { "id": "B2", "title": "Админка восстановления", "inScope": false },
+    { "id": "B3", "title": "Промокоды", "inScope": false },
+    { "id": "B4", "title": "Каталог под нагрузкой", "inScope": false }
+  ],
+  "userStories": ["US1", "US2", "US3", "US4", "US5", "US6", "US7", "US8"],
+  "tests": ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10"],
+  "apiEndpoints": [
+    "GET /api/products",
+    "POST /api/orders",
+    "GET /api/orders/:id",
+    "POST /api/webhooks/payment",
+    "POST /api/orders/:id/simulate-payment",
+    "POST /api/orders/:id/retry-delivery"
+  ],
+  "figma": {
+    "fileKey": "G7WwIhdchy0cbkdTbfIR1d",
+    "main": "1:4",
+    "catalogOpen": "1:864",
+    "inScopeNodes": ["1:598", "1:610", "1:641", "1:494", "1:495", "1:547", "1:145", "1:223", "1:1193"],
+    "outOfScopeNodes": ["1:753", "1:59", "1:6", "1:557"]
+  },
+  "affectedDomains": ["database", "backend", "frontend", "domain", "tests", "infra"],
+  "openDefaults": {
+    "webhookBeforeOrder": "server-generated order id + buffer PaymentEvent by order_id",
+    "requestIdOnFallback": "new request_id for B; A keeps its own",
+    "queue": "not in MVP",
+    "promocode": "visual only"
+  }
+}

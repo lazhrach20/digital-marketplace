@@ -1,0 +1,31 @@
+{
+  "emptyOrBootstrap": true,
+  "summary": "Greenfield: PRDs + Cursor orchestrator tooling only. No NestJS, Prisma, apps/web, tests, Docker, package.json, or README.",
+  "root": [".cursor", ".execution", ".git", ".playwright-mcp", "prds"],
+  "package": { "exists": false },
+  "nest": { "exists": false },
+  "prisma": { "exists": false },
+  "domain": { "exists": false },
+  "web": { "exists": false },
+  "scripts": { "exists": false },
+  "tests": { "exists": false },
+  "docker": { "exists": false },
+  "readme": { "exists": false },
+  "cursor": {
+    "skills": ["prd-orchestrator", "task-orchestrator", "bug-orchestrator", "task-writer", "bug-writer"],
+    "rules": ["stack.mdc", "domain.mdc", "error-handling.mdc"],
+    "commands": ["run-prd.md", "run-task.md", "run-bug.md", "new-task.md", "new-bug.md"],
+    "mcp": ["playwright"]
+  },
+  "prds": ["tz_main.md", "Тестовое задание Бэкенд разработчик.md", "Тестовое задание Фуллстек разработчик.md"],
+  "gapsVsPrd": [
+    "Entire scaffold missing (package.json, nest, prisma, apps/web, scripts, tests, docker, README)",
+    "All F1–F12 implementation absent"
+  ],
+  "alreadyImplemented": [
+    "PRD + stack/domain/error-handling rules (spec only)",
+    "Orchestrator skills/commands",
+    "Playwright MCP config",
+    "Phase 1 analysis artifact"
+  ]
+}

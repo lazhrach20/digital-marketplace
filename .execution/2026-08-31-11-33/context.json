@@ -1,0 +1,57 @@
+{
+  "executionId": "2026-08-31-11-33",
+  "prdPath": "prds/tz_main.md",
+  "prdTitle": "Digital Marketplace (ядро магазина цифровых товаров)",
+  "status": "in_progress",
+  "currentPhase": "decomposition",
+  "startedAt": "2026-08-31T07:33:00.000Z",
+  "phases": {
+    "analysis": {
+      "status": "completed",
+      "completedAt": "2026-08-31T07:35:00.000Z",
+      "summary": "MVP = F1–F12 (catalog, orders, webhook+simulate-payment, stub providers A/B, exactly-once, order lifecycle, timeout/retry/fallback, vanilla storefront from Figma G7WwIhdchy0cbkdTbfIR1d, order status page, structured logs, race scripts, retry-delivery). Out of scope: B1–B4. Tests T1–T10. Domains: database, backend, domain, frontend, tests, infra.",
+      "inScope": ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"],
+      "outOfScope": ["B1", "B2", "B3", "B4"],
+      "tests": ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10"],
+      "figmaFileKey": "G7WwIhdchy0cbkdTbfIR1d",
+      "affectedDomains": ["database", "backend", "frontend", "domain", "tests", "infra"],
+      "artifact": ".execution/2026-08-31-11-33/analysis.json"
+    },
+    "codebase": {
+      "status": "completed",
+      "completedAt": "2026-08-31T07:42:00.000Z",
+      "summary": "Greenfield repo: only PRDs, Cursor skills/rules/commands, Playwright MCP, and this execution folder. No NestJS, Prisma, apps/web, tests, Docker, package.json, or README.",
+      "emptyOrBootstrap": true,
+      "artifact": ".execution/2026-08-31-11-33/codebase.json"
+    },
+    "planning": {
+      "status": "completed",
+      "completedAt": "2026-08-31T07:44:00.000Z",
+      "summary": "8 layers: domain → database → API → A/B stubs → T1–T10/scripts → Figma storefront (G7WwIhdchy0cbkdTbfIR1d) → shared runtime → README. Decisions: ord_ ids + PaymentEvent buffer, simulate-payment = webhook handler, in-process A/B, new request_id on B, no queues, vanilla web. B1–B4 not built. One runtime :3000/:8080; Phase 6 Playwright QA.",
+      "artifact": ".execution/2026-08-31-11-33/planning.md",
+      "layers": [
+        "domain",
+        "database",
+        "api",
+        "fulfillment-stubs",
+        "tests-scripts",
+        "storefront-figma",
+        "infra-runtime",
+        "readme"
+      ]
+    },
+    "decomposition": { "status": "pending" },
+    "implementation": { "status": "pending" },
+    "review": { "status": "pending" },
+    "report": { "status": "pending" }
+  },
+  "runtime": {
+    "status": "stopped",
+    "apiUrl": null,
+    "webUrl": null,
+    "apiShellId": null,
+    "webShellId": null
+  },
+  "signal": 42,
+  "tasks": []
+}
