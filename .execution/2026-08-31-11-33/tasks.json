@@ -1,0 +1,562 @@
+[
+  {
+    "id": "task-001",
+    "title": "Bootstrap root workspace package.json",
+    "description": "Create root `package.json` with npm workspaces `apps/api` and `apps/web`, and add empty `apps/web/.gitkeep`. Do not delete or rewrite root `.gitignore` (it already ignores `.cursor/`, `prds/`, `.execution/`, `node_modules/`, `dist/`); only append an ignore pattern if a needed one is truly missing. No Nest logic yet.",
+    "domain": "infra",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": [],
+    "status": "pending"
+  },
+  {
+    "id": "task-002",
+    "title": "Scaffold NestJS apps/api package",
+    "description": "Create `apps/api/package.json` with NestJS (`@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`), TypeScript strict, `class-validator`, and `class-transformer`. Add `apps/api/tsconfig.json` (strict) and empty `apps/api/src/app.module.ts`. Do not add React/Next/Vue/Tailwind/Playwright. Do not start Nest.",
+    "domain": "infra",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-001"],
+    "status": "pending"
+  },
+  {
+    "id": "task-003",
+    "title": "Add domain enums",
+    "description": "Create `apps/api/src/domain/enums.ts` with explicit enums: OrderStatus (`created`|`paid`|`delivering`|`delivered`|`payment_failed`|`out_of_stock`|`delivery_failed`), ProductType (`topup`|`key`|`subscription`|`giftcard`), ProviderId (`A`|`B`), PaymentStatus (`paid`|`failed`), FulfillmentOutcome (`ok`|`timeout`|`error`|`out_of_stock`). Later tasks must import these, not redefine them.",
+    "domain": "domain",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-002"],
+    "status": "pending"
+  },
+  {
+    "id": "task-004",
+    "title": "Add order id helper",
+    "description": "Create `apps/api/src/domain/order-id.ts` generating `ord_` + nanoid/uuid, plus parse/validate `ord_[A-Za-z0-9_-]+` for buffered webhook apply (T5). Add `nanoid` (or equivalent) only on `apps/api/package.json` if needed.",
+    "domain": "domain",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-002"],
+    "status": "pending"
+  },
+  {
+    "id": "task-005",
+    "title": "Implement order state machine",
+    "description": "Create `apps/api/src/domain/state-machine.ts` with pure `canTransition(from, to)` / `assertTransition`. Allowed: `created→paid→delivering→delivered`; `created→payment_failed`; `paid|delivering→out_of_stock|delivery_failed`; recoverable `out_of_stock|delivery_failed→delivering` via retry-delivery only; stuck `delivering` resumable. Terminal `delivered` and `payment_failed` reject further payment/fulfillment side effects. Import OrderStatus from enums. Covers F6.",
+    "domain": "domain",
+    "complexity": "medium",
+    "model": "default",
+    "dependencies": ["task-003"],
+    "status": "pending"
+  },
+  {
+    "id": "task-006",
+    "title": "Implement payment apply policy",
+    "description": "Create `apps/api/src/domain/payment-policy.ts` with pure `applyPaymentEvent(...)`. First durable payment outcome wins: ignore `failed` after `paid`/`delivered`; ignore `paid` after `payment_failed`; duplicate `event_id` returns flag `duplicate` and is a no-op. Unknown order is a buffer (not an apply). No I/O. Covers F3/F5.",
+    "domain": "domain",
+    "complexity": "medium",
+    "model": "default",
+    "dependencies": ["task-003", "task-005"],
+    "status": "pending"
+  },
+  {
+    "id": "task-007",
+    "title": "Implement fulfillment retry/fallback policy",
+    "description": "Create `apps/api/src/domain/fulfillment-policy.ts` with pure `nextFulfillmentAction(...)` and request-id helpers: A uses `req_{orderId}-A` on every retry; B uses new `req_{orderId}-B`; never mix providers on one request_id. Timeout ≠ failure (retry same request_id on A). Fallback B only after A retries exhausted or A hard-down. Accept timeoutMs and A retry count as numbers. At most one successful issue per order. Covers F7.",
+    "domain": "domain",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-003"],
+    "status": "pending"
+  },
+  {
+    "id": "task-008",
+    "title": "Define provider and persistence ports",
+    "description": "Create `apps/api/src/domain/ports.ts` with interfaces only: `IssueProvider.issue({ requestId, sku, orderId })` → `{ status:'ok', requestId, code }` | `{ status:'error', reason }` | timeout; plus `InventoryPort`, `OrderPort`, `PaymentEventPort`. No implementations.",
+    "domain": "domain",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-003"],
+    "status": "pending"
+  },
+  {
+    "id": "task-009",
+    "title": "Add structured log event constants",
+    "description": "Create `apps/api/src/domain/log-events.ts` with constants `payment.accepted`, `fulfillment.attempt`, `order.status_changed`. Document required fields: payment (`eventId`,`orderId`,`status`,`duplicate`); fulfillment (`orderId`,`requestId`,`provider`,`outcome`); status (`orderId`,`from`,`to`). Never log full `code`. Covers F10.",
+    "domain": "domain",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-002"],
+    "status": "pending"
+  },
+  {
+    "id": "task-010",
+    "title": "Add Compose Postgres service",
+    "description": "Create root `docker-compose.yml` with Postgres only (service `db`, port 5432, user/password/db suitable for `DATABASE_URL`). Do not add an API service yet. Do not run `docker compose up/down` or start any process.",
+    "domain": "infra",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-001"],
+    "status": "pending"
+  },
+  {
+    "id": "task-011",
+    "title": "Add env.example provider and DB vars",
+    "description": "Create `.env.example` with `DATABASE_URL`, `PORT=3000`, `PROVIDER_TIMEOUT_MS=3000`, `PROVIDER_A_RETRIES=2`, `PROVIDER_A_ERROR_RATE`, `PROVIDER_A_TIMEOUT_RATE`, `PROVIDER_B_ERROR_RATE` and short comments for defaults. No secrets. Do not create a real `.env` with credentials.",
+    "domain": "infra",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-001"],
+    "status": "pending"
+  },
+  {
+    "id": "task-012",
+    "title": "Write Prisma schema for MVP entities",
+    "description": "Create `prisma/schema.prisma` exactly as planning.md Layer 2: Product (sku unique, name, type, price, currency RUB, image); InventoryKey (code unique, sku nullable shared pool, orderId nullable unique — one code ≤ one order); Order (string pk `ord_…`, sku, amount, currency, status, code nullable, timestamps); PaymentEvent (eventId unique, orderId string not required FK, status, payload JSON, processedAt nullable); ProviderRequest (requestId unique, orderId, provider A|B, outcome, code snapshot nullable). Indexes: Order.status, PaymentEvent.orderId, free keys (orderId IS NULL). Add Prisma to root `package.json` only if missing. Follow planning.md entities; do not invent bonus tables (no ledger, no promocodes).",
+    "domain": "database",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-003"],
+    "status": "pending"
+  },
+  {
+    "id": "task-013",
+    "title": "Add initial Prisma migration SQL",
+    "description": "Add `prisma/migrations/0001_init/migration.sql` (and `prisma/migrations/migration_lock.toml` if needed) matching schema.prisma. Do not start Docker; write SQL by hand or `prisma migrate diff --from-empty --to-schema-datamodel` without applying. Include unique eventId/requestId/code and partial unique InventoryKey.orderId WHERE NOT NULL.",
+    "domain": "database",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-012"],
+    "status": "pending"
+  },
+  {
+    "id": "task-014",
+    "title": "Seed twelve catalog products",
+    "description": "Create `prisma/seed.ts` inserting the 12 SKUs from `prds/tz_main.md` catalog (STEAM-TOPUP-500 … GIFT-ROBLOX-800; types/prices/images as in that PRD — read only, do not edit `prds/`). Set `prisma.seed` in root `package.json`. Covers F1 seed.",
+    "domain": "database",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-012"],
+    "status": "pending"
+  },
+  {
+    "id": "task-015",
+    "title": "Seed fifty shared inventory keys",
+    "description": "Extend `prisma/seed.ts` to insert 50 keys verbatim from `prds/Тестовое задание Бэкенд разработчик.md` (starts `LFXC-TNCS-BPCD`, ends `7EQM-K09J-XKUO`), sku null (shared pool), orderId null. Add a short restock helper function or commented SQL in the same file for T10/F12 extra keys. Do not edit `prds/`. Covers F4 pool.",
+    "domain": "database",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-014"],
+    "status": "pending"
+  },
+  {
+    "id": "task-016",
+    "title": "Add thin PrismaModule",
+    "description": "Create `apps/api/src/prisma/prisma.service.ts` and `apps/api/src/prisma/prisma.module.ts` (global PrismaClient, onModuleInit/onModuleDestroy). Register PrismaModule in `apps/api/src/app.module.ts`. No business rules or Prisma middleware.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-002", "task-012"],
+    "status": "pending"
+  },
+  {
+    "id": "task-017",
+    "title": "Configure main.ts pipe filter CORS",
+    "description": "Create `apps/api/src/main.ts` (global prefix `api`, listen port 3000, CORS origin `http://localhost:8080`, `ValidationPipe({ whitelist: true, transform: true })`) and `apps/api/src/common/http-exception.filter.ts` per `.cursor/rules/error-handling.mdc` (error body `statusCode`, `traceId` from `x-trace-id`, `message`; 400 validation, 404, 409). Do not start Nest. Do not edit `.cursor/`.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-002"],
+    "status": "pending"
+  },
+  {
+    "id": "task-018",
+    "title": "Implement GET /api/products",
+    "description": "Create `apps/api/src/catalog/catalog.module.ts`, `catalog.controller.ts`, and `catalog.service.ts`. `GET /api/products` returns sku, name, type, price, currency, image, and unbound InventoryKey count. Unknown later wiring is AppModule. Covers F1.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-016", "task-003"],
+    "status": "pending"
+  },
+  {
+    "id": "task-019",
+    "title": "Implement POST /api/orders with buffer apply",
+    "description": "Create `apps/api/src/orders/orders.module.ts`, `orders.controller.ts`, and `orders.service.ts` (CreateOrderDto with class-validator in the controller file). `POST /api/orders` `{ sku, id? }`: unknown sku 404; price/currency from Product; status `created`; omit id → generate `ord_…`; provided id → validate format, 409 if exists (T5). After insert, same transaction: load buffered PaymentEvents for that orderId and apply via domain payment-policy. Covers F2/F5.",
+    "domain": "backend",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-016", "task-004", "task-005", "task-006"],
+    "status": "pending"
+  },
+  {
+    "id": "task-020",
+    "title": "Implement GET /api/orders/:id",
+    "description": "Add `GET /api/orders/:id` to `apps/api/src/orders/orders.controller.ts` and `orders.service.ts`. 404 if missing. Return `code` only when status is `delivered`, else `null`. Covers F2/F9.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-019"],
+    "status": "pending"
+  },
+  {
+    "id": "task-021",
+    "title": "Add FulfillmentModule port stub",
+    "description": "Create `apps/api/src/fulfillment/fulfillment.module.ts` and `apps/api/src/fulfillment/fulfillment.service.ts` implementing a start/retry port (no-op or not-implemented) that later Layer 4 will fill. Injects domain IssueProvider/InventoryPort types only. No adapters yet.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-008"],
+    "status": "pending"
+  },
+  {
+    "id": "task-022",
+    "title": "Implement shared payment webhook handler",
+    "description": "Create `apps/api/src/payments/payments.module.ts`, `payments.service.ts` (`handlePaymentWebhook(dto)`), and `payment-webhook.dto.ts`. Persist unique `event_id` before/with first apply; duplicate → 200, log `payment.accepted` with `duplicate:true`, no side effects; unknown order_id → buffer PaymentEvent, 200, no fulfillment; `paid` on `created` → paid then call fulfillment port; `failed` on `created` → `payment_failed`; terminal orders no-op 200; do not trust payload amount. Log `order.status_changed`. Covers F3/F5/F10.",
+    "domain": "backend",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-005", "task-006", "task-009", "task-016", "task-021"],
+    "status": "pending"
+  },
+  {
+    "id": "task-023",
+    "title": "Add POST /api/webhooks/payment route",
+    "description": "Create `apps/api/src/payments/payments.controller.ts` and register it in `payments.module.ts`. `POST /api/webhooks/payment` body `{ event_id, order_id, status: paid|failed, amount?, currency?, created_at? }` calls `handlePaymentWebhook`. No signature check. Covers F3.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-022"],
+    "status": "pending"
+  },
+  {
+    "id": "task-024",
+    "title": "Add simulate-payment endpoint",
+    "description": "Add `POST /api/orders/:id/simulate-payment` `{ status: paid|failed }` to `orders.controller.ts` and `orders.service.ts`; import PaymentsModule in `orders.module.ts`. Generate `event_id`, set order_id from path, call the same `handlePaymentWebhook`. 404 if order missing. Covers F3.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-020", "task-023"],
+    "status": "pending"
+  },
+  {
+    "id": "task-025",
+    "title": "Add retry-delivery endpoint",
+    "description": "Add `POST /api/orders/:id/retry-delivery` to `orders.controller.ts` and `orders.service.ts`. Allowed from `out_of_stock` | `delivery_failed` | stuck `delivering` (use state-machine). Idempotent: if already `delivered`, return the same `code`. Calls fulfillment port (real allocate comes in Layer 4). Covers F12.",
+    "domain": "backend",
+    "complexity": "medium",
+    "model": "default",
+    "dependencies": ["task-005", "task-020", "task-021"],
+    "status": "pending"
+  },
+  {
+    "id": "task-026",
+    "title": "Register feature modules in AppModule",
+    "description": "Update only `apps/api/src/app.module.ts` to import CatalogModule, OrdersModule, PaymentsModule, FulfillmentModule, and PrismaModule (already present). Keep AppModule free of domain logic.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-016", "task-018", "task-019", "task-021", "task-022"],
+    "status": "pending"
+  },
+  {
+    "id": "task-027",
+    "title": "Implement race-safe inventory allocate",
+    "description": "Create `apps/api/src/fulfillment/inventory.service.ts` and register it in `fulfillment.module.ts`. Pick one unbound key with `SELECT … FOR UPDATE SKIP LOCKED` (or Prisma `$transaction` equivalent), bind `orderId`, unique `code`. If none → `out_of_stock`. One code ≤ one order. Covers F4/F12.",
+    "domain": "backend",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-016", "task-021"],
+    "status": "pending"
+  },
+  {
+    "id": "task-028",
+    "title": "Implement provider A adapter",
+    "description": "Create `apps/api/src/fulfillment/provider-a.adapter.ts` and `provider-request.store.ts`; wire in `fulfillment.module.ts`. In-process A: configurable error and timeout rates from env. Create ProviderRequest with stable `requestId` before issue; retries reuse the row and return stored `code` if already `ok`. Persist allocate before returning so a timeout-after-issue retry yields the same code. Covers F4/F7.",
+    "domain": "backend",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-008", "task-011", "task-027"],
+    "status": "pending"
+  },
+  {
+    "id": "task-029",
+    "title": "Implement provider B fallback adapter",
+    "description": "Create `apps/api/src/fulfillment/provider-b.adapter.ts` (clone of A, own error rate, own `request_id`) and register it in `fulfillment.module.ts`. Same shared InventoryKey pool and ProviderRequest store. Covers F4/F7.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-028"],
+    "status": "pending"
+  },
+  {
+    "id": "task-030",
+    "title": "Implement fulfillment orchestrator",
+    "description": "Replace the stub in `apps/api/src/fulfillment/fulfillment.service.ts` using domain fulfillment-policy: `paid→delivering`; call A with `req_{orderId}-A` and retries/backoff; A `ok` → bind code, `delivered`; A `out_of_stock` → `out_of_stock` (do not call B — pool is shared); A exhausted timeout/5xx → B with `req_{orderId}-B`; both fail → `delivery_failed`. One code per order (unique bind wins). Log `fulfillment.attempt` without full code. Update `fulfillment.module.ts` providers. Covers F4/F5/F7/F12.",
+    "domain": "backend",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-007", "task-009", "task-021", "task-027", "task-028", "task-029"],
+    "status": "pending"
+  },
+  {
+    "id": "task-031",
+    "title": "Lock parallel paid webhooks to one winner",
+    "description": "Update `apps/api/src/payments/payments.service.ts` and `apps/api/src/fulfillment/fulfillment.service.ts` so parallel `paid` webhooks take a row lock / `UPDATE … WHERE status = 'created'` — one winner starts issue; others see in-progress or terminal. Covers F5.",
+    "domain": "backend",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-022", "task-030"],
+    "status": "pending"
+  },
+  {
+    "id": "task-032",
+    "title": "Add env flags for A timeout and A-down",
+    "description": "Extend `apps/api/src/fulfillment/provider-a.adapter.ts` with deterministic flags (e.g. timeout-then-success-on-retry; always-down) for T6/T7/scripts, and document them in `.env.example`. Do not start servers. Covers F7/F11.",
+    "domain": "backend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-011", "task-028"],
+    "status": "pending"
+  },
+  {
+    "id": "task-033",
+    "title": "Add Jest PostgreSQL test harness",
+    "description": "Add `apps/api/test/jest-e2e.json`, `apps/api/test/helpers/postgres.ts` (Testcontainers preferred, or dedicated test DATABASE_URL), and Jest/testcontainers deps plus a placeholder test script on `apps/api/package.json`. Migrate+seed (or truncated seed) per suite. PostgreSQL only — never SQLite. In-process Nest or random port; do not bind a second listener on :3000. Do not start Docker Compose.",
+    "domain": "tests",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-013", "task-016"],
+    "status": "pending"
+  },
+  {
+    "id": "task-034",
+    "title": "Add T1 create-order e2e test",
+    "description": "Create `apps/api/test/t1-create-order.e2e-spec.ts`: `POST /api/orders` → status `created`, amount/currency from server Product not client. Covers T1.",
+    "domain": "tests",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-033", "task-019"],
+    "status": "pending"
+  },
+  {
+    "id": "task-035",
+    "title": "Add T2 paid-delivered e2e test",
+    "description": "Create `apps/api/test/t2-paid-delivered.e2e-spec.ts`: webhook `paid` → order `delivered` with exactly one `code`. Covers T2.",
+    "domain": "tests",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-033", "task-023", "task-030"],
+    "status": "pending"
+  },
+  {
+    "id": "task-036",
+    "title": "Add T3 parallel paid race e2e test",
+    "description": "Create `apps/api/test/t3-parallel-paid.e2e-spec.ts`: 50 parallel `paid` webhooks (different `event_id`, same `order_id`) → one delivery, one InventoryKey consumed. Covers T3/F5.",
+    "domain": "tests",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-033", "task-031"],
+    "status": "pending"
+  },
+  {
+    "id": "task-037",
+    "title": "Add T4 duplicate event_id e2e test",
+    "description": "Create `apps/api/test/t4-dup-event.e2e-spec.ts`: duplicate `event_id` → HTTP 200, order state unchanged. Covers T4.",
+    "domain": "tests",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-033", "task-023"],
+    "status": "pending"
+  },
+  {
+    "id": "task-038",
+    "title": "Add T5 webhook-before-order e2e test",
+    "description": "Create `apps/api/test/t5-webhook-before-order.e2e-spec.ts`: webhook before `POST /api/orders` with matching `id` → buffer then apply once, no duplicate issue. Covers T5/F5.",
+    "domain": "tests",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-033", "task-019", "task-023", "task-030"],
+    "status": "pending"
+  },
+  {
+    "id": "task-039",
+    "title": "Add T6 timeout same request_id e2e test",
+    "description": "Create `apps/api/test/t6-timeout-same-request-id.e2e-spec.ts`: A times out after issuing; retry same `request_id` → same code, no second key. Use env injection flags. Covers T6/F7.",
+    "domain": "tests",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-033", "task-030", "task-032"],
+    "status": "pending"
+  },
+  {
+    "id": "task-040",
+    "title": "Add T7 A-to-B fallback e2e test",
+    "description": "Create `apps/api/test/t7-fallback-a-to-b.e2e-spec.ts`: A unavailable/5xx → B → one delivery. Use env injection flags. Covers T7/F7.",
+    "domain": "tests",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-033", "task-030", "task-032"],
+    "status": "pending"
+  },
+  {
+    "id": "task-041",
+    "title": "Add T8 empty-pool e2e test",
+    "description": "Create `apps/api/test/t8-empty-pool.e2e-spec.ts`: paid with empty InventoryKey pool → `out_of_stock`, process stays up (no crash). Covers T8.",
+    "domain": "tests",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-033", "task-030"],
+    "status": "pending"
+  },
+  {
+    "id": "task-042",
+    "title": "Add T9 payment_failed e2e test",
+    "description": "Create `apps/api/test/t9-payment-failed.e2e-spec.ts`: webhook `failed` → `payment_failed`, `code` is null. Covers T9.",
+    "domain": "tests",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-033", "task-023"],
+    "status": "pending"
+  },
+  {
+    "id": "task-043",
+    "title": "Add T10 restock retry-delivery e2e test",
+    "description": "Create `apps/api/test/t10-retry-delivery.e2e-spec.ts`: empty pool → restock → `retry-delivery` yields one key; second retry-delivery returns the same code. Covers T10/F12.",
+    "domain": "tests",
+    "complexity": "high",
+    "model": "default",
+    "dependencies": ["task-033", "task-015", "task-025", "task-030"],
+    "status": "pending"
+  },
+  {
+    "id": "task-044",
+    "title": "Add race and idempotency scripts",
+    "description": "Create `scripts/race-webhooks.ts` (50× paid), `scripts/dup-event.ts`, and `scripts/webhook-before-order.ts` using the same webhook contract as UI simulate-payment (`POST /api/webhooks/payment`). Do not start servers; scripts target `http://localhost:3000` when the orchestrator runtime is up. Covers F11.",
+    "domain": "tests",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-023"],
+    "status": "pending"
+  },
+  {
+    "id": "task-045",
+    "title": "Add timeout fallback and restock scripts",
+    "description": "Create `scripts/timeout-same-request-id.ts`, `scripts/fallback-a-to-b.ts`, and `scripts/empty-pool-retry.ts` (empty pool then retry-delivery after restock). Same webhook contract; do not start servers. Covers F11/F12.",
+    "domain": "tests",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-025", "task-032"],
+    "status": "pending"
+  },
+  {
+    "id": "task-046",
+    "title": "Add npm scripts for tests and races",
+    "description": "Update root `package.json` (or `apps/api/package.json` if that is where Jest lives) with one command that runs T1–T10 and documented npm scripts for the race/fallback files. Do not start Docker or Nest from these scripts.",
+    "domain": "tests",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-033", "task-044", "task-045"],
+    "status": "pending"
+  },
+  {
+    "id": "task-047",
+    "title": "Build storefront layout tokens and shell",
+    "description": "Create `apps/web/index.html` and `apps/web/styles.css`. Figma fileKey `G7WwIhdchy0cbkdTbfIR1d`, node `1:4` (Home V3 closed catalog; artboard 1920, content column 1280, cut page at ~y=1000). Load skill `figma-design-to-code`, then MCP `get_design_context` (clientLanguages html,css,javascript; clientFrameworks none). Rewrite React+Tailwind reference to vanilla. Tokens: Montserrat Bold/SemiBold/ExtraBold, `#fff`, `#f2f4f7`, CTA `#000`, prices `#4c9a2a`/`#9ca3af`, Steam outline `#1482b3`. Download assets to `apps/web/assets/`. No React/Tailwind. Covers F8.",
+    "domain": "frontend",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-001"],
+    "status": "pending"
+  },
+  {
+    "id": "task-048",
+    "title": "Implement storefront header",
+    "description": "Edit `apps/web/index.html` and `apps/web/styles.css`; download logo/icons into `apps/web/assets/`. Figma fileKey `G7WwIhdchy0cbkdTbfIR1d`, nodes `1:598` (header) and `1:610` (catalog button); logo from `1:4` if missing in header. Load skill `figma-design-to-code` + `get_design_context`; rewrite React+Tailwind to vanilla. Search and profile are visual only. Covers F8.",
+    "domain": "frontend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-047"],
+    "status": "pending"
+  },
+  {
+    "id": "task-049",
+    "title": "Implement banner carousel",
+    "description": "Edit `apps/web/index.html`, `apps/web/styles.css`, and create `apps/web/app.js`. Figma fileKey `G7WwIhdchy0cbkdTbfIR1d`, nodes `1:641` (carousel), `1:659`/`1:664` (arrows), `1:645` (6 dots). Load skill `figma-design-to-code` + `get_design_context`; rewrite React+Tailwind to vanilla; download assets to `apps/web/assets/`. Auto and/or arrows, click dots, active dot synced. Set `API_BASE=http://localhost:3000/api` and use `fetch` only. Covers F8 carousel interactive.",
+    "domain": "frontend",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-047"],
+    "status": "pending"
+  },
+  {
+    "id": "task-050",
+    "title": "Implement service icons row",
+    "description": "Edit `apps/web/index.html` and `apps/web/styles.css`; download the 11 cell icons into `apps/web/assets/`. Figma fileKey `G7WwIhdchy0cbkdTbfIR1d`, nodes `1:494` (service card) and `1:495` (icons list). Load skill `figma-design-to-code` + `get_design_context`; rewrite React+Tailwind to vanilla. Hover lift/outline required; click icon need not switch the Steam block. Covers F8 icon hover.",
+    "domain": "frontend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-047"],
+    "status": "pending"
+  },
+  {
+    "id": "task-051",
+    "title": "Implement Steam block visual",
+    "description": "Edit `apps/web/index.html`, `apps/web/styles.css`, and `apps/web/app.js` for currency chip active state only. Figma fileKey `G7WwIhdchy0cbkdTbfIR1d`, node `1:547` (Steam block). Load skill `figma-design-to-code` + `get_design_context`; rewrite React+Tailwind to vanilla. No currency recalc; do not fix ₽ vs $ mismatch; Steam login visual only; promo button visual only (do not implement promocode logic — B3 is out of scope); «Оплатить» in this block need not create an order. Covers F8 currency switcher.",
+    "domain": "frontend",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-047", "task-049"],
+    "status": "pending"
+  },
+  {
+    "id": "task-052",
+    "title": "Implement popular cards and buy",
+    "description": "Edit `apps/web/index.html`, `apps/web/styles.css`, and `apps/web/app.js`. Figma fileKey `G7WwIhdchy0cbkdTbfIR1d`, nodes `1:145` (popular products) and `1:223` (card). Load skill `figma-design-to-code` + `get_design_context`; rewrite React+Tailwind to vanilla. Five cards, hover shadow/`translateY`. Titles/prices from seed catalog (not Figma “DOOM 2016”). Buy → `POST /api/orders` `{ sku }`, disable button after click, then go to order status page. Covers F8/F2/F5.",
+    "domain": "frontend",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-018", "task-019", "task-049"],
+    "status": "pending"
+  },
+  {
+    "id": "task-053",
+    "title": "Implement catalog dropdown menu",
+    "description": "Edit `apps/web/index.html`, `apps/web/styles.css`, and `apps/web/app.js`. Figma fileKey `G7WwIhdchy0cbkdTbfIR1d`, nodes `1:864` (open catalog) and `1:1193`. Load skill `figma-design-to-code` + `get_design_context`; rewrite React+Tailwind to vanilla. Open on catalog button (`1:610`), close on second click or outside. Sidebar/columns may be simplified; open/close is required. Do not implement reviews `1:753`/`1:59` or footer `1:6`. Covers F8 catalog menu.",
+    "domain": "frontend",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-048", "task-049"],
+    "status": "pending"
+  },
+  {
+    "id": "task-054",
+    "title": "Add order status page",
+    "description": "Create `apps/web/order.html` and `apps/web/order.js`; reuse `apps/web/styles.css`. Design is not from Figma (no get_design_context). Show status, sku, amount, `code` if delivered, messages for `out_of_stock` / `payment_failed` / `delivery_failed`. Buttons: simulate success/fail → `POST /api/orders/:id/simulate-payment`. Optional retry-delivery control for recoverable states. `fetch` to `http://localhost:3000/api`. Covers F9/F3/F12.",
+    "domain": "frontend",
+    "complexity": "medium",
+    "model": "fast",
+    "dependencies": ["task-020", "task-024", "task-052"],
+    "status": "pending"
+  },
+  {
+    "id": "task-055",
+    "title": "Add optional API service to Compose",
+    "description": "Update `docker-compose.yml` to add optional service `api` (Nest image/build on port 3000) beside existing `db`. Wire `DATABASE_URL`, CORS `http://localhost:8080`, and provider rate env vars. Do not start compose, Nest, or a static server. Web is not required in compose. Covers Layer 7 wiring only.",
+    "domain": "infra",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-010", "task-011", "task-017"],
+    "status": "pending"
+  },
+  {
+    "id": "task-056",
+    "title": "Write README with run and race notes",
+    "description": "Create `README.md`: how to run compose db, migrate, seed, API :3000, static web :8080; one npm command for T1–T10; how to reproduce 50 webhooks and A timeout / A→B fallback with the same webhook contract as simulate-payment; short decisions (exactly-once, timeout ≠ failure, fallback new request_id, webhook-before-order buffer, scale via indexes later); restock keys for F12/T10; in-process stub providers; hours-spent placeholder; do not log full codes. Explicit sentence: «промокоды не реализованы». Do not recreate orchestrator files.",
+    "domain": "infra",
+    "complexity": "low",
+    "model": "fast",
+    "dependencies": ["task-015", "task-046", "task-055"],
+    "status": "pending"
+  }
+]

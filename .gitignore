@@ -1,7 +1,6 @@
 # App deliverable only — keep orchestrator / local tooling out of git
 .cursor/
 prds/
-.execution/
 .playwright-mcp/
 
 # Dependencies and build
