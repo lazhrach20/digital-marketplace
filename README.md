@@ -57,6 +57,148 @@ npx serve apps/web -p 8080
 
 Откройте [http://localhost:8080](http://localhost:8080). Каталог → заказ → «Оплатить» вызывает `POST /api/orders/:id/simulate-payment` — тот же обработчик, что и платёжный webhook.
 
+## Демонстрация
+
+Витрина (Home V3): шапка, карусель, иконки сервисов, блок Steam, популярные товары. «Купить» создаёт заказ и открывает страницу статуса.
+
+![Главная витрина](docs/screenshots/storefront-home.png)
+
+Каталог открывается по кнопке «Каталог», закрывается повторным кликом или кликом снаружи.
+
+![Открытое меню каталога](docs/screenshots/storefront-catalog.png)
+
+Страница заказа (`order.html?id=` / `/order?id=`): статус, SKU, сумма. Для `created` — симуляция оплаты (тот же путь, что webhook).
+
+![Заказ создан, симуляция оплаты](docs/screenshots/order-created.png)
+
+После успешной оплаты заказ переходит в `delivered`, ключ показывается один раз.
+
+![Заказ выдан, ключ на экране](docs/screenshots/order-delivered.png)
+
+## API (NestJS, префикс `/api`)
+
+База: `http://localhost:3000/api`. JSON. CORS: `http://localhost:8080`.
+
+Ошибки:
+
+```json
+{ "statusCode": 404, "traceId": "<из заголовка x-trace-id или отсутствует>", "message": "…" }
+```
+
+Типичные коды: `400` валидация, `404` нет ресурса, `409` конфликт (заказ уже есть / retry из недопустимого статуса).
+
+Статусы заказа: `created` | `paid` | `delivering` | `delivered` | `payment_failed` | `out_of_stock` | `delivery_failed`.
+
+Поле `code` в ответах заказа **не null только при** `delivered`.
+
+### `GET /api/products`
+
+Каталог. `stock` — число **свободных** ключей в общем пуле (не per-SKU).
+
+Ответ `200`:
+
+```json
+[
+  {
+    "sku": "STEAM-TOPUP-500",
+    "name": "Пополнение Steam 500 ₽",
+    "type": "topup",
+    "price": 500,
+    "currency": "RUB",
+    "image": "assets/steam.png",
+    "stock": 50
+  }
+]
+```
+
+`type`: `topup` | `key` | `subscription` | `giftcard`.
+
+### `POST /api/orders`
+
+Создать заказ. Цена и валюта берутся из `Product`, не из тела.
+
+Тело:
+
+```json
+{ "sku": "STEAM-TOPUP-500", "id": "ord_optional" }
+```
+
+`id` опционален. Без него сервер генерирует `ord_…`. С `id` — формат `ord_[A-Za-z0-9_-]+`; если заказ уже есть — `409`. Неизвестный `sku` — `404`.
+
+После вставки в той же транзакции применяются отложенные webhook’и с этим `order_id` (webhook до заказа).
+
+Ответ `201`:
+
+```json
+{
+  "id": "ord_gp8yzfToCY-vZd6ddknfO",
+  "sku": "STEAM-TOPUP-500",
+  "status": "created",
+  "amount": 500,
+  "currency": "RUB",
+  "code": null
+}
+```
+
+### `GET /api/orders/:id`
+
+`404`, если нет заказа.
+
+Ответ `200` — те же поля, что у создания; `code` — строка только для `delivered`.
+
+### `POST /api/orders/:id/simulate-payment`
+
+Заглушка оплаты для UI. Генерирует `event_id` и вызывает **тот же** `handlePaymentWebhook`, что и платёжный webhook. Нет заказа — `404`.
+
+Тело: `{ "status": "paid" }` или `{ "status": "failed" }`.
+
+Ответ `200`: `{ "duplicate": false }` (или `true`, если событие уже обрабатывали — для симуляции обычно новый `event_id`).
+
+`paid` на `created` → выдача ключа (A, при необходимости B). `failed` на `created` → `payment_failed`.
+
+### `POST /api/orders/:id/retry-delivery`
+
+Повтор выдачи. Тело не нужно.
+
+Разрешено из `out_of_stock`, `delivery_failed`, застрявшего `delivering`. Уже `delivered` — `200` с тем же `code` (идемпотентно). Иначе `409`. Нет заказа — `404`.
+
+Ответ `200` — как `GET /api/orders/:id`.
+
+### `POST /api/webhooks/payment`
+
+Входящий webhook платёжки. Подписи нет. `amount` / `currency` / `created_at` **не** перезаписывают сумму заказа.
+
+Тело:
+
+```json
+{
+  "event_id": "evt_1",
+  "order_id": "ord_…",
+  "status": "paid",
+  "amount": 500,
+  "currency": "RUB",
+  "created_at": "2026-08-31T12:00:00.000Z"
+}
+```
+
+`event_id`, `order_id`, `status` обязательны. `status`: `paid` | `failed`.
+
+Ответ всегда `200` при принятом событии:
+
+```json
+{ "duplicate": false }
+```
+
+| Ситуация | Поведение |
+|----------|-----------|
+| Повтор того же `event_id` | `200`, `duplicate: true`, без побочных эффектов |
+| Заказа ещё нет | Событие в буфер, `200`, выдача не стартует |
+| `paid` на `created` | Заказ `paid` → fulfillment; один ключ на заказ |
+| `failed` на `created` | `payment_failed` |
+| Терминальный заказ | `200`, no-op |
+
+Параллельные `paid` сериализуются на строке заказа: выдачу стартует один победитель.
+
 ## Тесты (T1–T10)
 
 Один npm-команда из корня репозитория:
