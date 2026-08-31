@@ -85,3 +85,25 @@ const API_BASE = 'http://localhost:3000/api';
   goTo(0);
   startAuto();
 })();
+
+(function initSteamCurrency() {
+  const root = document.getElementById('steam-topup');
+  if (!root) {
+    return;
+  }
+
+  const chips = Array.from(root.querySelectorAll('.steam-topup__currency'));
+  if (!chips.length) {
+    return;
+  }
+
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      chips.forEach(function (item) {
+        const isActive = item === chip;
+        item.classList.toggle('steam-topup__currency--active', isActive);
+        item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    });
+  });
+})();

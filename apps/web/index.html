@@ -283,7 +283,89 @@
             class="storefront__section steam-topup"
             id="steam-topup"
             aria-label="Пополнение Steam"
-          ></section>
+          >
+            <div class="steam-topup__card">
+              <div class="steam-topup__grid">
+                <div class="steam-topup__info">
+                  <div class="steam-topup__icon-wrap">
+                    <div class="steam-topup__icon">
+                      <img src="assets/steam.png" alt="" width="72" height="72" />
+                    </div>
+                  </div>
+                  <div class="steam-topup__meta">
+                    <div class="steam-topup__title-row">
+                      <h2 class="steam-topup__title">Пополнение Steam</h2>
+                      <span class="steam-topup__badge">5%</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="steam-topup__promo"
+                      tabindex="-1"
+                      aria-label="Ввести промокод"
+                    >
+                      <span class="steam-topup__promo-label">Ввести промокод</span>
+                      <span class="steam-topup__promo-chevron" aria-hidden="true"></span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="steam-topup__field steam-topup__field--login u-field">
+                  <div class="steam-topup__field-main">
+                    <span class="steam-topup__field-icon steam-topup__field-icon--profile" aria-hidden="true">
+                      <img src="assets/profile-head.svg" alt="" width="8" height="8" />
+                      <img src="assets/profile-body.svg" alt="" width="13" height="7" />
+                    </span>
+                    <span class="steam-topup__field-placeholder">Логин Steam</span>
+                  </div>
+                  <span class="steam-topup__info-btn" aria-hidden="true">i</span>
+                </div>
+
+                <div class="steam-topup__field steam-topup__field--amount u-field">
+                  <div class="steam-topup__amount-main">
+                    <span class="steam-topup__amount-icon" aria-hidden="true"></span>
+                    <div class="steam-topup__amount-text">
+                      <span class="steam-topup__amount-label">Сумма</span>
+                      <span class="steam-topup__amount-value">500₽</span>
+                    </div>
+                  </div>
+                  <div
+                    class="steam-topup__currencies"
+                    role="group"
+                    aria-label="Выбор валюты"
+                  >
+                    <button
+                      type="button"
+                      class="steam-topup__currency steam-topup__currency--active"
+                      data-currency="usd"
+                      aria-pressed="true"
+                    >
+                      $
+                    </button>
+                    <button
+                      type="button"
+                      class="steam-topup__currency"
+                      data-currency="kzt"
+                      aria-pressed="false"
+                    >
+                      ₸
+                    </button>
+                    <button
+                      type="button"
+                      class="steam-topup__currency"
+                      data-currency="rub"
+                      aria-pressed="false"
+                    >
+                      ₽
+                    </button>
+                  </div>
+                </div>
+
+                <button type="button" class="steam-topup__pay" tabindex="-1">
+                  Оплатить 500$
+                </button>
+              </div>
+            </div>
+          </section>
 
           <section
             class="storefront__section product-rail"
