@@ -1,0 +1,8 @@
+{
+  "name": "digital-marketplace",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ]
+}
