@@ -90,6 +90,132 @@
           </div>
         </header>
 
+        <div
+          class="catalog-dropdown"
+          id="catalog-dropdown"
+          hidden
+          aria-hidden="true"
+        >
+          <div
+            class="catalog-dropdown__panel"
+            role="dialog"
+            aria-label="Каталог товаров"
+          >
+            <nav class="catalog-dropdown__sidebar" aria-label="Категории каталога">
+              <ul class="catalog-dropdown__categories">
+                <li>
+                  <button
+                    type="button"
+                    class="catalog-dropdown__category catalog-dropdown__category--active"
+                    data-category="games"
+                  >
+                    Игры и игровые сервисы
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="catalog-dropdown__category"
+                    data-category="values"
+                  >
+                    Игровые ценности
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="catalog-dropdown__category"
+                    data-category="mobile"
+                  >
+                    Мобильные игры
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="catalog-dropdown__category"
+                    data-category="services"
+                  >
+                    Сервисы и соцсети
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="catalog-dropdown__category"
+                    data-category="software"
+                  >
+                    Программы
+                  </button>
+                </li>
+              </ul>
+            </nav>
+
+            <div class="catalog-dropdown__content">
+              <div class="catalog-dropdown__columns">
+                <div class="catalog-dropdown__column">
+                  <h3 class="catalog-dropdown__column-title">Steam</h3>
+                  <ul class="catalog-dropdown__links">
+                    <li><a class="catalog-dropdown__link" href="#">Пополнение Steam</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Ключи и подарки</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Steam Deck</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Аккаунты</a></li>
+                  </ul>
+                </div>
+
+                <div class="catalog-dropdown__column">
+                  <h3 class="catalog-dropdown__column-title">PlayStation</h3>
+                  <ul class="catalog-dropdown__links">
+                    <li><a class="catalog-dropdown__link" href="#">PS Plus</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Пополнение кошелька</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Игры PS4 / PS5</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Подписки</a></li>
+                  </ul>
+                </div>
+
+                <div class="catalog-dropdown__column">
+                  <h3 class="catalog-dropdown__column-title">Xbox</h3>
+                  <ul class="catalog-dropdown__links">
+                    <li><a class="catalog-dropdown__link" href="#">Game Pass</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Пополнение Xbox</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Игры Xbox</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Live Gold</a></li>
+                  </ul>
+                </div>
+
+                <div class="catalog-dropdown__column">
+                  <h3 class="catalog-dropdown__column-title">Nintendo</h3>
+                  <ul class="catalog-dropdown__links">
+                    <li><a class="catalog-dropdown__link" href="#">Nintendo eShop</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Switch Online</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Игры Switch</a></li>
+                  </ul>
+                </div>
+
+                <div class="catalog-dropdown__column">
+                  <h3 class="catalog-dropdown__column-title">Battle.net</h3>
+                  <ul class="catalog-dropdown__links">
+                    <li><a class="catalog-dropdown__link" href="#">World of Warcraft</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Diablo</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Overwatch</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Hearthstone</a></li>
+                  </ul>
+                </div>
+
+                <div class="catalog-dropdown__column">
+                  <h3 class="catalog-dropdown__column-title">Подборки</h3>
+                  <ul class="catalog-dropdown__links">
+                    <li><a class="catalog-dropdown__link" href="#">Новинки</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Хиты продаж</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Скидки</a></li>
+                    <li><a class="catalog-dropdown__link" href="#">Бесплатные игры</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <main class="storefront__main">
           <section
             class="storefront__section hero-carousel"

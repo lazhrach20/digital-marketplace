@@ -1,5 +1,70 @@
 const API_BASE = 'http://localhost:3000/api';
 
+(function initCatalogDropdown() {
+  const button = document.getElementById('catalog-button');
+  const dropdown = document.getElementById('catalog-dropdown');
+
+  if (!button || !dropdown) {
+    return;
+  }
+
+  const categories = Array.from(
+    dropdown.querySelectorAll('.catalog-dropdown__category')
+  );
+
+  function isOpen() {
+    return button.getAttribute('aria-expanded') === 'true';
+  }
+
+  function openDropdown() {
+    dropdown.hidden = false;
+    dropdown.setAttribute('aria-hidden', 'false');
+    button.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeDropdown() {
+    dropdown.hidden = true;
+    dropdown.setAttribute('aria-hidden', 'true');
+    button.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleDropdown() {
+    if (isOpen()) {
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
+  }
+
+  button.addEventListener('click', function (event) {
+    event.stopPropagation();
+    toggleDropdown();
+  });
+
+  document.addEventListener('click', function (event) {
+    if (!isOpen()) {
+      return;
+    }
+
+    if (dropdown.contains(event.target) || button.contains(event.target)) {
+      return;
+    }
+
+    closeDropdown();
+  });
+
+  categories.forEach(function (category) {
+    category.addEventListener('click', function () {
+      categories.forEach(function (item) {
+        item.classList.toggle(
+          'catalog-dropdown__category--active',
+          item === category
+        );
+      });
+    });
+  });
+})();
+
 (function initHeroCarousel() {
   const track = document.getElementById('hero-carousel-track');
   const prevBtn = document.getElementById('hero-carousel-prev');
