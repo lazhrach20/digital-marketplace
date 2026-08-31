@@ -96,7 +96,7 @@ npm run race:webhooks
 # опционально: npm run race:webhooks -- ord_abc123
 ```
 
-Отправляет 50 параллельных `paid` webhook с разными `event_id`. Ожидание: ровно один принят, остальные `duplicate: true`, заказ переходит в paid/delivering/delivered без двойной выдачи.
+Отправляет 50 параллельных `paid` webhook с **разными** `event_id` (T3). Все 50 должны получить HTTP 200 (скрипт ретраит 5xx/таймауты с тем же `event_id`). События не дубликаты: каждое сохраняется. Выдача ровно один раз: заказ `delivered`, один `code` / `InventoryKey`.
 
 ### T6 / F7 — таймаут A, retry с тем же `request_id`
 

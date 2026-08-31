@@ -26,10 +26,58 @@ const POLL_STATUSES = ['paid', 'delivering'];
 let pollTimerId = null;
 let busy = false;
 
-function getOrderIdFromQuery() {
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get('id');
-  return id && id.trim() !== '' ? id.trim() : null;
+function trimId(value) {
+  if (!value || typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed !== '' ? trimmed : null;
+}
+
+function getOrderIdFromSearch() {
+  return trimId(new URLSearchParams(window.location.search).get('id'));
+}
+
+function getOrderIdFromHash() {
+  const rawHash = window.location.hash.replace(/^#/, '');
+  if (!rawHash) {
+    return null;
+  }
+
+  if (rawHash.indexOf('=') !== -1) {
+    return trimId(new URLSearchParams(rawHash).get('id'));
+  }
+
+  try {
+    return trimId(decodeURIComponent(rawHash));
+  } catch (_error) {
+    return trimId(rawHash);
+  }
+}
+
+function getOrderIdFromPath() {
+  const segments = window.location.pathname.split('/').filter(Boolean);
+  const last = segments[segments.length - 1];
+  if (!last) {
+    return null;
+  }
+
+  const pageNames = { order: true, 'order.html': true, index: true, 'index.html': true };
+  if (pageNames[last.toLowerCase()]) {
+    return null;
+  }
+
+  try {
+    return trimId(decodeURIComponent(last));
+  } catch (_error) {
+    return trimId(last);
+  }
+}
+
+function getOrderIdFromLocation() {
+  return (
+    getOrderIdFromSearch() || getOrderIdFromHash() || getOrderIdFromPath()
+  );
 }
 
 function formatAmount(amount, currency) {
@@ -346,7 +394,7 @@ async function retryDelivery(orderId) {
 }
 
 (function initOrderPage() {
-  const orderId = getOrderIdFromQuery();
+  const orderId = getOrderIdFromLocation();
 
   if (!orderId) {
     showFatalError('Не указан идентификатор заказа (?id=...)');

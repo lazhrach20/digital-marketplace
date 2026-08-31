@@ -301,8 +301,10 @@ async function startOrder(sku, button) {
     }
 
     const order = await response.json();
-    window.location.href =
-      'order.html?id=' + encodeURIComponent(order.id);
+    const orderId = encodeURIComponent(order.id);
+    // Path without .html: npx serve clean-urls 301s order.html → /order
+    // and drops ?id=. Hash is a fallback if a redirect still strips search.
+    window.location.href = '/order?id=' + orderId + '#id=' + orderId;
   } catch (_error) {
     button.disabled = false;
   }

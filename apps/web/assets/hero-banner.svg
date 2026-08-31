@@ -1,5 +1,22 @@
 <svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1200" height="263" viewBox="0 0 1200 263" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Subtract">
-<path d="M1090 0C1096.63 0 1102 5.37258 1102 12V26C1102 38.1503 1111.85 48 1124 48H1188C1194.63 48 1200 53.3726 1200 60V251C1200 257.627 1194.63 263 1188 263H12C5.37258 263 2.13416e-07 257.627 0 251V12C0 5.37258 5.37258 0 12 0H1090Z" fill="black" style="mix-blend-mode:plus-darker"/>
-</g>
+  <defs>
+    <linearGradient id="promoFill" x1="0" y1="0" x2="1200" y2="263" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="0.45" stop-color="#7C3AED"/>
+      <stop offset="0.78" stop-color="#EC4899"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <clipPath id="bannerShape">
+      <path d="M1090 0C1096.63 0 1102 5.37258 1102 12V26C1102 38.1503 1111.85 48 1124 48H1188C1194.63 48 1200 53.3726 1200 60V251C1200 257.627 1194.63 263 1188 263H12C5.37258 263 2.13416e-07 257.627 0 251V12C0 5.37258 5.37258 0 12 0H1090Z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#bannerShape)">
+    <rect width="1200" height="263" fill="url(#promoFill)"/>
+    <circle cx="980" cy="40" r="150" fill="#ffffff" fill-opacity="0.14"/>
+    <circle cx="1140" cy="210" r="110" fill="#FDE68A" fill-opacity="0.22"/>
+    <circle cx="820" cy="230" r="70" fill="#ffffff" fill-opacity="0.1"/>
+    <rect x="56" y="86" width="8" height="92" rx="4" fill="#FDE68A"/>
+    <text x="84" y="128" fill="#ffffff" font-family="Montserrat, system-ui, sans-serif" font-size="40" font-weight="800">Игры и подписки со скидкой</text>
+    <text x="84" y="172" fill="#ffffff" fill-opacity="0.92" font-family="Montserrat, system-ui, sans-serif" font-size="20" font-weight="600">Ключи, top-up и гифт-карты — мгновенная выдача</text>
+  </g>
 </svg>
