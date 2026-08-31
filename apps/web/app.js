@@ -151,6 +151,187 @@ const API_BASE = 'http://localhost:3000/api';
   startAuto();
 })();
 
+const FALLBACK_PRODUCTS = [
+  {
+    sku: 'STEAM-TOPUP-500',
+    name: 'Пополнение Steam 500 ₽',
+    price: 500,
+    currency: 'RUB',
+    image: 'assets/steam.png',
+  },
+  {
+    sku: 'STEAM-TOPUP-1000',
+    name: 'Пополнение Steam 1000 ₽',
+    price: 1000,
+    currency: 'RUB',
+    image: 'assets/steam.png',
+  },
+  {
+    sku: 'STEAM-TOPUP-2500',
+    name: 'Пополнение Steam 2500 ₽',
+    price: 2500,
+    currency: 'RUB',
+    image: 'assets/steam.png',
+  },
+  {
+    sku: 'KEY-CS2-PRIME',
+    name: 'CS2 Prime Status ключ',
+    price: 1290,
+    currency: 'RUB',
+    image: 'assets/cs2.png',
+  },
+  {
+    sku: 'KEY-GTA5',
+    name: 'GTA V ключ активации',
+    price: 1990,
+    currency: 'RUB',
+    image: 'assets/gta5.png',
+  },
+];
+
+function formatProductPrice(price, currency) {
+  const formatted = new Intl.NumberFormat('ru-RU').format(price);
+  if (currency === 'RUB') {
+    return formatted + ' ₽';
+  }
+  return formatted + ' ' + currency;
+}
+
+function decorativeOldPrice(price) {
+  return Math.round(price * 1.5);
+}
+
+function createPopularProductCard(product) {
+  const card = document.createElement('article');
+  card.className = 'product-card';
+  card.setAttribute('role', 'listitem');
+  card.dataset.sku = product.sku;
+
+  const cover = document.createElement('div');
+  cover.className = 'product-card__cover';
+
+  const image = document.createElement('img');
+  image.src = product.image || 'assets/steam.png';
+  image.alt = '';
+  image.width = 203;
+  image.height = 152;
+  image.addEventListener('error', function () {
+    image.src = 'assets/steam.png';
+  });
+  cover.appendChild(image);
+
+  const title = document.createElement('h3');
+  title.className = 'product-card__title';
+  title.textContent = product.name;
+
+  const prices = document.createElement('div');
+  prices.className = 'product-card__prices';
+
+  const currentPrice = document.createElement('span');
+  currentPrice.className = 'product-card__price';
+  currentPrice.textContent = formatProductPrice(product.price, product.currency);
+
+  const oldPrice = document.createElement('span');
+  oldPrice.className = 'product-card__price-old';
+  oldPrice.textContent = formatProductPrice(
+    decorativeOldPrice(product.price),
+    product.currency
+  );
+
+  prices.appendChild(currentPrice);
+  prices.appendChild(oldPrice);
+
+  const buyButton = document.createElement('button');
+  buyButton.type = 'button';
+  buyButton.className = 'product-card__buy';
+  buyButton.textContent = 'Купить';
+  buyButton.addEventListener('click', function () {
+    startOrder(product.sku, buyButton);
+  });
+
+  card.appendChild(cover);
+  card.appendChild(title);
+  card.appendChild(prices);
+  card.appendChild(buyButton);
+
+  return card;
+}
+
+function renderPopularProducts(products) {
+  const grid = document.getElementById('popular-products-grid');
+  if (!grid) {
+    return;
+  }
+
+  grid.replaceChildren();
+
+  products.slice(0, 5).forEach(function (product) {
+    grid.appendChild(createPopularProductCard(product));
+  });
+}
+
+async function fetchPopularProducts() {
+  try {
+    const response = await fetch(API_BASE + '/products');
+    if (!response.ok) {
+      throw new Error('Products request failed');
+    }
+    const products = await response.json();
+    if (!Array.isArray(products) || products.length === 0) {
+      return FALLBACK_PRODUCTS;
+    }
+    return products;
+  } catch (_error) {
+    return FALLBACK_PRODUCTS;
+  }
+}
+
+async function startOrder(sku, button) {
+  button.disabled = true;
+
+  try {
+    const response = await fetch(API_BASE + '/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sku: sku }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Order request failed');
+    }
+
+    const order = await response.json();
+    window.location.href =
+      'order.html?id=' + encodeURIComponent(order.id);
+  } catch (_error) {
+    button.disabled = false;
+  }
+}
+
+(function initPopularProducts() {
+  const section = document.getElementById('popular-products');
+  const grid = document.getElementById('popular-products-grid');
+  if (!section || !grid) {
+    return;
+  }
+
+  const chips = Array.from(
+    section.querySelectorAll('.product-rail__chip')
+  );
+
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      chips.forEach(function (item) {
+        item.classList.toggle('product-rail__chip--active', item === chip);
+      });
+    });
+  });
+
+  fetchPopularProducts().then(function (products) {
+    renderPopularProducts(products);
+  });
+})();
+
 (function initSteamCurrency() {
   const root = document.getElementById('steam-topup');
   if (!root) {

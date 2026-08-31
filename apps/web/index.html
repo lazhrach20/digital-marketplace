@@ -494,10 +494,53 @@
           </section>
 
           <section
-            class="storefront__section product-rail"
+            class="storefront__section product-rail product-rail--popular"
             id="popular-products"
             aria-label="Популярные товары"
-          ></section>
+          >
+            <div class="product-rail__inner">
+              <div class="product-rail__header">
+                <h2 class="product-rail__title">Популярные товары</h2>
+                <div
+                  class="product-rail__chips"
+                  role="list"
+                  aria-label="Категории товаров"
+                >
+                  <button
+                    type="button"
+                    class="product-rail__chip product-rail__chip--active"
+                    role="listitem"
+                  >
+                    Донат
+                  </button>
+                  <button type="button" class="product-rail__chip" role="listitem">
+                    Подписки
+                  </button>
+                  <button type="button" class="product-rail__chip" role="listitem">
+                    Предметы
+                  </button>
+                  <button type="button" class="product-rail__chip" role="listitem">
+                    Аккаунты
+                  </button>
+                  <button type="button" class="product-rail__chip" role="listitem">
+                    Ключи
+                  </button>
+                  <button type="button" class="product-rail__chip" role="listitem">
+                    Игровая валюта
+                  </button>
+                  <button type="button" class="product-rail__chip" role="listitem">
+                    Другое
+                  </button>
+                </div>
+              </div>
+              <div
+                class="product-rail__grid"
+                id="popular-products-grid"
+                role="list"
+                aria-live="polite"
+              ></div>
+            </div>
+          </section>
 
           <section
             class="storefront__section product-rail"
