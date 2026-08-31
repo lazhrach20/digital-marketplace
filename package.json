@@ -1,6 +1,12 @@
 {
   "name": "digital-marketplace",
   "private": true,
+  "scripts": {
+    "test:e2e": "npm run test:e2e -w @digital-marketplace/api",
+    "race:webhooks": "tsx scripts/race-webhooks.ts",
+    "race:timeout": "tsx scripts/timeout-same-request-id.ts",
+    "race:fallback": "tsx scripts/fallback-a-to-b.ts"
+  },
   "workspaces": [
     "apps/api",
     "apps/web"
