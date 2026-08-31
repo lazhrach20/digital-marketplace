@@ -1,0 +1,204 @@
+/* Digital Marketplace — layout shell & design tokens (task-047) */
+
+:root {
+  /* Typography */
+  --font-family: "Montserrat", system-ui, sans-serif;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Layout */
+  --artboard-width: 1920px;
+  --content-width: 1280px;
+  --content-gutter: calc((100vw - var(--content-width)) / 2);
+  --header-height: 80px;
+
+  /* Surfaces */
+  --color-page-side: #141820;
+  --color-column-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-header-border: #f2f4f7;
+  --color-divider: #e8eaed;
+
+  /* Text */
+  --color-text-primary: #1f2937;
+  --color-text-heading: #14181d;
+  --color-text-muted: #8a94a6;
+  --color-search-placeholder: #76829b;
+  --color-icon-label: #363636;
+
+  /* Actions */
+  --color-cta-bg: #000000;
+  --color-cta-text: #ffffff;
+  --radius-cta: 10px;
+  --radius-cta-lg: 12px;
+
+  /* Form fields */
+  --color-field-bg: #f4f5f7;
+  --radius-field: 12px;
+
+  /* Pricing */
+  --color-price: #4c9a2a;
+  --color-price-old: #9ca3af;
+
+  /* Brand accents */
+  --color-steam-outline: #1482b3;
+  --color-badge-green: #6eb83f;
+
+  /* Shadows */
+  --shadow-service-card: 0 10px 17px rgba(20, 40, 80, 0.08);
+  --shadow-product-card: 0 11px 25px rgba(20, 40, 80, 0.1);
+
+  /* Spacing rhythm (Figma gaps) */
+  --space-section: 16px;
+  --space-main-top: 16px;
+  --space-main-bottom: 48px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  background-color: var(--color-page-side);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Page chrome: dark sides + centered light column */
+.storefront {
+  min-height: 100vh;
+}
+
+.storefront__frame {
+  min-height: 100vh;
+  background-color: var(--color-page-side);
+}
+
+.storefront__column {
+  width: 100%;
+  max-width: var(--content-width);
+  min-height: 100vh;
+  margin-inline: auto;
+  background-color: var(--color-column-bg);
+}
+
+/* Header shell (content filled in later tasks) */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-header-border);
+}
+
+.storefront__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-section);
+  padding: var(--space-main-top) 0 var(--space-main-bottom);
+}
+
+/* Semantic section placeholders */
+.storefront__section {
+  margin: 0;
+  padding-inline: 0;
+}
+
+.hero-carousel {
+  min-height: 263px;
+}
+
+.category-icons {
+  min-height: 108px;
+}
+
+.steam-topup {
+  min-height: 72px;
+}
+
+.product-rail {
+  min-height: 330px;
+}
+
+/* Reusable token utilities for upcoming components */
+.u-surface-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-cta-lg);
+  box-shadow: var(--shadow-service-card);
+}
+
+.u-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius-cta);
+  background-color: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.u-field {
+  background-color: var(--color-field-bg);
+  border-radius: var(--radius-field);
+  border: none;
+}
+
+.u-price {
+  color: var(--color-price);
+  font-weight: var(--font-weight-bold);
+}
+
+.u-price-old {
+  color: var(--color-price-old);
+  text-decoration: line-through;
+}
+
+.u-icon-label {
+  color: var(--color-icon-label);
+  font-weight: var(--font-weight-bold);
+}
+
+.u-search-placeholder {
+  color: var(--color-search-placeholder);
+  font-size: 12px;
+  letter-spacing: -0.03em;
+}
+
+.u-steam-outline {
+  border: 2px solid var(--color-steam-outline);
+  border-radius: var(--radius-cta-lg);
+}
+
+/* Visually hidden until sections are implemented */
+.storefront__section:empty {
+  outline: 1px dashed rgba(118, 130, 155, 0.25);
+  outline-offset: -1px;
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+@media (max-width: 1280px) {
+  :root {
+    --content-gutter: 0px;
+  }
+
+  .storefront__column {
+    max-width: 100%;
+  }
+}
