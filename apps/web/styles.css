@@ -409,8 +409,173 @@ body {
   background-color: #ffffff;
 }
 
+/* Service icons row (task-050, Figma 1:494 / 1:495) */
 .category-icons {
-  min-height: 108px;
+  padding-inline: 40px;
+}
+
+.category-icons__card {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 20px;
+  border-radius: 16px;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-service-card);
+}
+
+.category-icons__list {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.category-icons__item {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  width: 76px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+}
+
+.category-icons__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 14px;
+}
+
+.category-icons__icon-wrap--pubg {
+  border-radius: 16px;
+  background-color: #000000;
+  box-shadow: 0 4px 4px #d1d9e4;
+}
+
+.category-icons__icon {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  box-shadow: 0 4px 8px #d1d9e4;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    outline-color 0.2s ease;
+}
+
+.category-icons__icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.category-icons__icon--steam {
+  border-color: var(--color-steam-outline);
+}
+
+.category-icons__icon--telegram {
+  border-color: #45baee;
+}
+
+.category-icons__icon--roblox {
+  border-color: #b8c5ff;
+}
+
+.category-icons__icon--brawl-stars {
+  border-color: #e86eff;
+}
+
+.category-icons__icon--pubg {
+  border: 3px solid #ffffff;
+  box-shadow: none;
+}
+
+.category-icons__icon--app-store {
+  border-color: #4acdff;
+}
+
+.category-icons__icon--chatgpt {
+  border-color: #38d4ad;
+}
+
+.category-icons__icon--playstation {
+  border-color: #117fda;
+}
+
+.category-icons__icon--tiktok {
+  border-color: #454545;
+  background-color: #000000;
+}
+
+.category-icons__icon--mobile-legends {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.category-icons__icon--more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-color: #dfe5ef;
+  background-color: #f2f4f7;
+  box-shadow: none;
+}
+
+.category-icons__icon--more img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 0;
+}
+
+.category-icons__label {
+  color: var(--color-icon-label);
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  line-height: 24px;
+  letter-spacing: -0.16px;
+  white-space: nowrap;
+}
+
+.category-icons__label--pubg {
+  color: #000000;
+}
+
+.category-icons__label--more {
+  color: var(--color-text-muted);
+}
+
+.category-icons__item:hover .category-icons__icon,
+.category-icons__item:focus-visible .category-icons__icon {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(20, 40, 80, 0.16);
+  outline: 2px solid rgba(20, 129, 179, 0.35);
+  outline-offset: 2px;
+}
+
+.category-icons__item--pubg:hover .category-icons__icon,
+.category-icons__item--pubg:focus-visible .category-icons__icon {
+  outline-color: rgba(0, 0, 0, 0.25);
+}
+
+.category-icons__item--more:hover .category-icons__icon,
+.category-icons__item--more:focus-visible .category-icons__icon {
+  outline-color: rgba(138, 148, 166, 0.45);
 }
 
 .steam-topup {
