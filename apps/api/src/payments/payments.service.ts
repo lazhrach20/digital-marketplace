@@ -103,6 +103,7 @@ export class PaymentsService {
       },
     });
 
+    // F5: serialize parallel paid/failed webhooks on the order row.
     const locked = await tx.$queryRaw<{ id: string; status: string }[]>`
       SELECT id, status FROM "Order" WHERE id = ${orderId} FOR UPDATE
     `;
@@ -127,11 +128,13 @@ export class PaymentsService {
     });
 
     if (result.kind === 'noop') {
+      // Already in-progress (paid/delivering) or terminal — do not start issue.
       return { duplicate: false, startFulfillment: false };
     }
 
+    // F5: only one webhook wins `created` → paid|payment_failed.
     const updated = await tx.order.updateMany({
-      where: { id: orderId, status: result.from },
+      where: { id: orderId, status: OrderStatus.created },
       data: { status: result.to },
     });
 

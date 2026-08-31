@@ -83,10 +83,7 @@ export class FulfillmentService {
   }
 
   async startForPaidOrder(orderId: string): Promise<void> {
-    const order = await this.beginFulfillment(orderId, [
-      OrderStatus.paid,
-      OrderStatus.delivering,
-    ]);
+    const order = await this.claimIssue(orderId, [OrderStatus.paid]);
     if (!order) {
       return;
     }
@@ -94,7 +91,7 @@ export class FulfillmentService {
   }
 
   async retryDelivery(orderId: string): Promise<void> {
-    const order = await this.beginFulfillment(orderId, [
+    const order = await this.claimIssue(orderId, [
       OrderStatus.out_of_stock,
       OrderStatus.delivery_failed,
       OrderStatus.delivering,
@@ -106,57 +103,59 @@ export class FulfillmentService {
   }
 
   /**
-   * Race-safe paid|recoverable → delivering. Parallel callers may both
-   * enter the loop; provider `request_id` + unique key bind keep one code.
+   * F5: one winner starts issue. Parallel `startForPaidOrder` callers take
+   * `SELECT … FOR UPDATE` then `UPDATE … WHERE status IN fromStatuses`;
+   * losers see in-progress (`delivering`) or terminal and return.
+   * Retry may resume a stuck `delivering` row.
    */
-  private async beginFulfillment(
+  private async claimIssue(
     orderId: string,
     fromStatuses: readonly OrderStatus[],
   ): Promise<{ id: string; sku: string } | null> {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-    });
-    if (!order) {
-      return null;
-    }
+    return this.prisma.$transaction(async (tx) => {
+      const locked = await tx.$queryRaw<
+        { id: string; sku: string; status: string }[]
+      >`
+        SELECT id, sku, status FROM "Order" WHERE id = ${orderId} FOR UPDATE
+      `;
+      const row = locked[0];
+      if (!row) {
+        return null;
+      }
 
-    const status = order.status as OrderStatus;
-    if (status === OrderStatus.delivered) {
-      return null;
-    }
-    if (status === OrderStatus.delivering) {
-      return { id: order.id, sku: order.sku };
-    }
-    if (!fromStatuses.includes(status)) {
-      return null;
-    }
-    if (!canTransition(status, OrderStatus.delivering)) {
-      return null;
-    }
+      const status = row.status as OrderStatus;
+      if (
+        status === OrderStatus.delivered ||
+        status === OrderStatus.payment_failed
+      ) {
+        return null;
+      }
 
-    const updated = await this.prisma.order.updateMany({
-      where: { id: orderId, status },
-      data: { status: OrderStatus.delivering },
-    });
-    if (updated.count === 1) {
+      if (status === OrderStatus.delivering) {
+        if (!fromStatuses.includes(OrderStatus.delivering)) {
+          return null;
+        }
+        return { id: row.id, sku: row.sku };
+      }
+
+      if (!fromStatuses.includes(status)) {
+        return null;
+      }
+      if (!canTransition(status, OrderStatus.delivering)) {
+        return null;
+      }
+
+      const updated = await tx.order.updateMany({
+        where: { id: orderId, status },
+        data: { status: OrderStatus.delivering },
+      });
+      if (updated.count !== 1) {
+        return null;
+      }
+
       this.logStatusChanged(orderId, status, OrderStatus.delivering);
-      return { id: order.id, sku: order.sku };
-    }
-
-    const raced = await this.prisma.order.findUnique({
-      where: { id: orderId },
+      return { id: row.id, sku: row.sku };
     });
-    if (!raced) {
-      return null;
-    }
-    const racedStatus = raced.status as OrderStatus;
-    if (racedStatus === OrderStatus.delivered) {
-      return null;
-    }
-    if (racedStatus === OrderStatus.delivering) {
-      return { id: raced.id, sku: raced.sku };
-    }
-    return null;
   }
 
   private async runLoop(orderId: string, sku: string): Promise<void> {
