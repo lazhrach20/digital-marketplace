@@ -7,7 +7,9 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { PaymentStatus } from '../domain/enums';
+import { HandlePaymentWebhookResult } from '../payments/payments.service';
 import { CreatedOrder, OrderDetail, OrdersService } from './orders.service';
 
 export class CreateOrderDto {
@@ -19,6 +21,11 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   id?: string;
+}
+
+export class SimulatePaymentDto {
+  @IsEnum(PaymentStatus)
+  status!: PaymentStatus;
 }
 
 @Controller('orders')
@@ -39,5 +46,14 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   retryDelivery(@Param('id') id: string): Promise<OrderDetail> {
     return this.ordersService.retryDelivery(id);
+  }
+
+  @Post(':id/simulate-payment')
+  @HttpCode(HttpStatus.OK)
+  simulatePayment(
+    @Param('id') id: string,
+    @Body() dto: SimulatePaymentDto,
+  ): Promise<HandlePaymentWebhookResult> {
+    return this.ordersService.simulatePayment(id, dto.status);
   }
 }

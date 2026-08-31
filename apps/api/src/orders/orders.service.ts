@@ -7,12 +7,17 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { nanoid } from 'nanoid';
 import { OrderStatus, PaymentStatus } from '../domain/enums';
 import { ORDER_STATUS_CHANGED } from '../domain/log-events';
 import { generateOrderId, isValidOrderId } from '../domain/order-id';
 import { applyPaymentEvent } from '../domain/payment-policy';
 import { canRetryDelivery } from '../domain/state-machine';
 import { FulfillmentService } from '../fulfillment/fulfillment.service';
+import {
+  HandlePaymentWebhookResult,
+  PaymentsService,
+} from '../payments/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type CreatedOrder = {
@@ -50,6 +55,7 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly fulfillmentService: FulfillmentService,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   async create(dto: CreateOrderDtoLike): Promise<CreatedOrder> {
@@ -124,6 +130,25 @@ export class OrdersService {
       throw new NotFoundException(`Order ${id} not found`);
     }
     return this.toOrderDetail(order);
+  }
+
+  /**
+   * F3: simulate payment for UI/race scripts — same handler as POST /webhooks/payment.
+   */
+  async simulatePayment(
+    id: string,
+    status: PaymentStatus,
+  ): Promise<HandlePaymentWebhookResult> {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) {
+      throw new NotFoundException(`Order ${id} not found`);
+    }
+
+    return this.paymentsService.handlePaymentWebhook({
+      event_id: `evt_${nanoid()}`,
+      order_id: id,
+      status,
+    });
   }
 
   /**
