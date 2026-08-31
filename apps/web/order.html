@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Заказ — Digital Marketplace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .order-page {
+        padding: 40px;
+      }
+
+      .order-page__card {
+        width: 100%;
+        max-width: 640px;
+        margin-inline: auto;
+        padding: 32px;
+        border-radius: 16px;
+        background-color: var(--color-surface);
+        box-shadow: var(--shadow-service-card);
+      }
+
+      .order-page__title {
+        margin: 0 0 8px;
+        color: var(--color-text-heading);
+        font-size: 20px;
+        font-weight: var(--font-weight-extrabold);
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+
+      .order-page__id {
+        margin: 0 0 24px;
+        color: var(--color-text-muted);
+        font-size: 13px;
+        font-weight: var(--font-weight-semibold);
+        word-break: break-all;
+      }
+
+      .order-page__status {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 24px;
+        padding: 8px 14px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: var(--font-weight-bold);
+        line-height: 1;
+      }
+
+      .order-page__status--created {
+        background-color: #eef2f7;
+        color: var(--color-text-primary);
+      }
+
+      .order-page__status--paid,
+      .order-page__status--delivering {
+        background-color: rgba(38, 139, 243, 0.12);
+        color: #1a6fb8;
+      }
+
+      .order-page__status--delivered {
+        background-color: rgba(110, 184, 63, 0.15);
+        color: #4c9a2a;
+      }
+
+      .order-page__status--payment_failed,
+      .order-page__status--delivery_failed {
+        background-color: rgba(220, 53, 69, 0.12);
+        color: #b42318;
+      }
+
+      .order-page__status--out_of_stock {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: #b45309;
+      }
+
+      .order-page__rows {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .order-page__row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--color-divider);
+      }
+
+      .order-page__row:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .order-page__label {
+        flex-shrink: 0;
+        color: var(--color-text-muted);
+        font-size: 13px;
+        font-weight: var(--font-weight-semibold);
+      }
+
+      .order-page__value {
+        color: var(--color-text-heading);
+        font-size: 15px;
+        font-weight: var(--font-weight-bold);
+        text-align: right;
+        word-break: break-word;
+      }
+
+      .order-page__value--price {
+        color: var(--color-price);
+        font-size: 18px;
+        font-weight: var(--font-weight-extrabold);
+      }
+
+      .order-page__code {
+        display: block;
+        width: 100%;
+        margin-top: 8px;
+        padding: 14px 16px;
+        border: none;
+        border-radius: var(--radius-field);
+        background-color: var(--color-field-bg);
+        color: var(--color-text-heading);
+        font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+        font-size: 16px;
+        font-weight: var(--font-weight-bold);
+        letter-spacing: 0.04em;
+        text-align: center;
+      }
+
+      .order-page__message {
+        margin-bottom: 24px;
+        padding: 14px 16px;
+        border-radius: var(--radius-field);
+        font-size: 14px;
+        font-weight: var(--font-weight-semibold);
+        line-height: 1.45;
+      }
+
+      .order-page__message--error {
+        background-color: rgba(220, 53, 69, 0.08);
+        color: #b42318;
+      }
+
+      .order-page__message--warning {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+      }
+
+      .order-page__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .order-page__btn {
+        min-width: 160px;
+        height: 48px;
+        padding: 0 20px;
+        border: none;
+        border-radius: var(--radius-cta);
+        font-family: var(--font-family);
+        font-size: 14px;
+        font-weight: var(--font-weight-bold);
+        line-height: 1;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+      }
+
+      .order-page__btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .order-page__btn--primary {
+        background-color: var(--color-cta-bg);
+        color: var(--color-cta-text);
+      }
+
+      .order-page__btn--primary:hover:not(:disabled) {
+        background-color: #1a1a1a;
+      }
+
+      .order-page__btn--secondary {
+        background-color: var(--color-divider);
+        color: var(--color-text-primary);
+      }
+
+      .order-page__btn--secondary:hover:not(:disabled) {
+        background-color: #dde1e8;
+      }
+
+      .order-page__back {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 24px;
+        color: var(--color-text-muted);
+        font-size: 14px;
+        font-weight: var(--font-weight-semibold);
+        text-decoration: none;
+      }
+
+      .order-page__back:hover {
+        color: var(--color-text-heading);
+      }
+
+      .order-page__error {
+        margin: 0;
+        color: #b42318;
+        font-size: 14px;
+        font-weight: var(--font-weight-semibold);
+        line-height: 1.45;
+      }
+
+      .order-page__loading {
+        margin: 0;
+        color: var(--color-text-muted);
+        font-size: 14px;
+        font-weight: var(--font-weight-semibold);
+      }
+    </style>
+  </head>
+  <body class="storefront">
+    <div class="storefront__frame">
+      <div class="storefront__column">
+        <header class="site-header" aria-label="Шапка сайта">
+          <div class="site-header__inner">
+            <a class="site-header__brand" href="index.html" aria-label="Digital Marketplace">
+              <span class="site-header__brand-text">GGSEL</span>
+            </a>
+          </div>
+        </header>
+
+        <main class="storefront__main order-page" id="order-page">
+          <a class="order-page__back" href="index.html">← Вернуться в каталог</a>
+
+          <div class="order-page__card" id="order-card" hidden>
+            <h1 class="order-page__title">Статус заказа</h1>
+            <p class="order-page__id" id="order-id"></p>
+
+            <div id="order-status-badge"></div>
+
+            <div class="order-page__rows">
+              <div class="order-page__row">
+                <span class="order-page__label">SKU</span>
+                <span class="order-page__value" id="order-sku"></span>
+              </div>
+              <div class="order-page__row">
+                <span class="order-page__label">Сумма</span>
+                <span class="order-page__value order-page__value--price" id="order-amount"></span>
+              </div>
+            </div>
+
+            <div id="order-message" hidden></div>
+            <div id="order-code-block" hidden></div>
+            <div class="order-page__actions" id="order-actions"></div>
+          </div>
+
+          <div class="order-page__card" id="order-state">
+            <p class="order-page__loading" id="order-loading">Загрузка заказа…</p>
+            <p class="order-page__error" id="order-error" hidden></p>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script src="order.js"></script>
+  </body>
+</html>
