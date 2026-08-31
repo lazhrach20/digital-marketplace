@@ -95,7 +95,68 @@
             class="storefront__section hero-carousel"
             id="hero-carousel"
             aria-label="Баннер-карусель"
-          ></section>
+            aria-roledescription="carousel"
+          >
+            <div class="hero-carousel__viewport">
+              <div
+                class="hero-carousel__track"
+                id="hero-carousel-track"
+                aria-live="polite"
+              >
+                <div class="hero-carousel__slide" role="group" aria-roledescription="slide" aria-label="Слайд 1 из 6">
+                  <img class="hero-carousel__banner" src="assets/hero-banner.svg" alt="" width="1200" height="263" />
+                </div>
+                <div class="hero-carousel__slide" role="group" aria-roledescription="slide" aria-label="Слайд 2 из 6" aria-hidden="true">
+                  <img class="hero-carousel__banner" src="assets/hero-banner.svg" alt="" width="1200" height="263" />
+                </div>
+                <div class="hero-carousel__slide" role="group" aria-roledescription="slide" aria-label="Слайд 3 из 6" aria-hidden="true">
+                  <img class="hero-carousel__banner" src="assets/hero-banner.svg" alt="" width="1200" height="263" />
+                </div>
+                <div class="hero-carousel__slide" role="group" aria-roledescription="slide" aria-label="Слайд 4 из 6" aria-hidden="true">
+                  <img class="hero-carousel__banner" src="assets/hero-banner.svg" alt="" width="1200" height="263" />
+                </div>
+                <div class="hero-carousel__slide" role="group" aria-roledescription="slide" aria-label="Слайд 5 из 6" aria-hidden="true">
+                  <img class="hero-carousel__banner" src="assets/hero-banner.svg" alt="" width="1200" height="263" />
+                </div>
+                <div class="hero-carousel__slide" role="group" aria-roledescription="slide" aria-label="Слайд 6 из 6" aria-hidden="true">
+                  <img class="hero-carousel__banner" src="assets/hero-banner.svg" alt="" width="1200" height="263" />
+                </div>
+              </div>
+
+              <div class="hero-carousel__nav" aria-label="Навигация по слайдам">
+                <button
+                  type="button"
+                  class="hero-carousel__arrow hero-carousel__arrow--prev"
+                  id="hero-carousel-prev"
+                  aria-label="Предыдущий слайд"
+                >
+                  <img src="assets/arrow-slider.svg" alt="" width="22" height="22" />
+                </button>
+                <button
+                  type="button"
+                  class="hero-carousel__arrow hero-carousel__arrow--next"
+                  id="hero-carousel-next"
+                  aria-label="Следующий слайд"
+                >
+                  <img src="assets/arrow-slider-next.svg" alt="" width="22" height="22" />
+                </button>
+              </div>
+
+              <div
+                class="hero-carousel__dots"
+                id="hero-carousel-dots"
+                role="tablist"
+                aria-label="Индикаторы слайдов"
+              >
+                <button type="button" class="hero-carousel__dot hero-carousel__dot--active" role="tab" aria-selected="true" aria-label="Слайд 1" data-index="0"></button>
+                <button type="button" class="hero-carousel__dot" role="tab" aria-selected="false" aria-label="Слайд 2" data-index="1"></button>
+                <button type="button" class="hero-carousel__dot" role="tab" aria-selected="false" aria-label="Слайд 3" data-index="2"></button>
+                <button type="button" class="hero-carousel__dot" role="tab" aria-selected="false" aria-label="Слайд 4" data-index="3"></button>
+                <button type="button" class="hero-carousel__dot" role="tab" aria-selected="false" aria-label="Слайд 5" data-index="4"></button>
+                <button type="button" class="hero-carousel__dot" role="tab" aria-selected="false" aria-label="Слайд 6" data-index="5"></button>
+              </div>
+            </div>
+          </section>
 
           <section
             class="storefront__section category-icons"
@@ -123,5 +184,6 @@
         </main>
       </div>
     </div>
+    <script src="app.js"></script>
   </body>
 </html>
